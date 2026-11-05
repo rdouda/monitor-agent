@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "snapshot-completed.schema.json",
+  "type": "object",
+  "required": [
+    "module", "snapshot_id", "scope_entity_id", "covers_kinds", "complete",
+    "started_at", "completed_at", "entities_count", "relationships_count", "errors"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "module": { "$ref": "common.schema.json#/$defs/moduleName" },
+    "snapshot_id": { "$ref": "common.schema.json#/$defs/uuid" },
+    "scope_entity_id": { "$ref": "common.schema.json#/$defs/entityId" },
+    "covers_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/entityKind" }
+    },
+    "complete": { "type": "boolean" },
+    "started_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "completed_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "entities_count": { "type": "integer", "minimum": 0 },
+    "relationships_count": { "type": "integer", "minimum": 0 },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "permission_denied", "api_error", "timeout", "limit_exceeded",
+              "fd_walk_timeout", "parse_error", "unavailable", "internal"
+            ]
+          },
+          "message": { "type": "string", "maxLength": 512 },
+          "kind": { "$ref": "common.schema.json#/$defs/entityKind" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "complete": { "const": true } } },
+      "then": { "properties": { "errors": { "maxItems": 0 } } } }
+  ]
+}

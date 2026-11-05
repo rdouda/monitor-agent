@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "relationship-removed.schema.json",
+  "type": "object",
+  "required": ["relationship_ids", "reason", "observed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "relationship_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": { "$ref": "common.schema.json#/$defs/relationshipId" }
+    },
+    "reason": { "enum": ["entity_removed", "network_disconnected", "no_longer_observed"] },
+    "observed_at": { "$ref": "common.schema.json#/$defs/timestamp" }
+  }
+}

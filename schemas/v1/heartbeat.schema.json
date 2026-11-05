@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "heartbeat.schema.json",
+  "type": "object",
+  "required": ["agent", "host_id", "modules", "queue", "reporting"],
+  "additionalProperties": false,
+  "properties": {
+    "agent": {
+      "type": "object",
+      "required": ["id", "run_id", "version", "status", "started_at", "uptime_seconds"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/uuid" },
+        "run_id": { "$ref": "common.schema.json#/$defs/uuid" },
+        "version": { "type": "string" },
+        "commit": { "type": "string" },
+        "status": { "enum": ["healthy", "degraded", "unhealthy"] },
+        "started_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "uptime_seconds": { "type": "integer", "minimum": 0 },
+        "rss_bytes": { "type": "integer", "minimum": 0 },
+        "cpu_utilization": { "type": "number", "minimum": 0 }
+      }
+    },
+    "host_id": { "$ref": "common.schema.json#/$defs/uuid" },
+    "modules": {
+      "type": "object",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/moduleName" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "additionalProperties": false,
+        "properties": {
+          "status": { "enum": ["healthy", "degraded", "unavailable", "failed", "disabled"] },
+          "reason": { "type": "string", "maxLength": 128 },
+          "last_success_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+          "last_error": { "type": "string", "maxLength": 512 },
+          "details": { "type": "object" }
+        }
+      }
+    },
+    "queue": {
+      "type": "object",
+      "required": ["depth_events", "size_bytes", "dropped_total"],
+      "additionalProperties": false,
+      "properties": {
+        "depth_events": { "type": "integer", "minimum": 0 },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "oldest_event_age_seconds": { "type": "integer", "minimum": 0 },
+        "dropped_total": {
+          "type": "object",
+          "required": ["p0", "p1", "p2"],
+          "additionalProperties": false,
+          "properties": {
+            "p0": { "type": "integer", "minimum": 0 },
+            "p1": { "type": "integer", "minimum": 0 },
+            "p2": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rejected_total": { "type": "integer", "minimum": 0 },
+        "lifecycle_rate_limited_total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "reporting": {
+      "type": "object",
+      "required": ["consecutive_failures"],
+      "additionalProperties": false,
+      "properties": {
+        "last_success_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "consecutive_failures": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

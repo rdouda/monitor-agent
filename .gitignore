@@ -1,0 +1,11 @@
+# build output
+/agent
+/bin/
+*.test
+*.out
+
+# local dev state created by scripts/dev.sh
+/.agent-state/
+
+# generated scan output
+/output.json

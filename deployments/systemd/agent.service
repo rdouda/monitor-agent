@@ -1,0 +1,35 @@
+[Unit]
+Description=Agent
+After=network-online.target docker.service podman.socket
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/agent run --config /etc/agent/agent.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+StateDirectory=agent
+StateDirectoryMode=0700
+LogsDirectory=agent
+ConfigurationDirectory=agent
+
+# Resource protection for the host
+MemoryMax=300M
+CPUQuota=50%
+OOMScoreAdjust=500
+LimitNOFILE=8192
+
+# Hardening that is compatible with full /proc and socket access
+NoNewPrivileges=yes
+ProtectSystem=strict
+PrivateTmp=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "entityKind": {
+      "enum": [
+        "host", "process", "container_engine", "container", "podman_pod",
+        "container_image", "container_network", "container_volume",
+        "network_interface", "network_route", "listening_socket"
+      ]
+    },
+    "entityId": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 512,
+      "pattern": "^(host|process|engine|container|pod|image|network|volume|iface|route|socket):.+$"
+    },
+    "relationshipId": { "type": "string", "pattern": "^rel:[0-9a-f]{32}$" },
+    "relationshipType": {
+      "enum": [
+        "runs_on", "child_of", "managed_by", "contains", "attached_to",
+        "uses_network", "uses_image", "mounts", "owned_by", "exposes", "connected_to"
+      ]
+    },
+    "moduleName": { "enum": ["host", "process", "containers", "network"] },
+    "scalar": { "type": ["string", "number", "boolean"] },
+    "scalarMap": {
+      "type": "object",
+      "maxProperties": 32,
+      "additionalProperties": { "$ref": "#/$defs/scalar" }
+    },
+    "labels": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": { "type": "string", "maxLength": 256 }
+    }
+  }
+}

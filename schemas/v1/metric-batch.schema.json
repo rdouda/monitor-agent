@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "metric-batch.schema.json",
+  "type": "object",
+  "required": ["observed_at", "readings"],
+  "additionalProperties": false,
+  "properties": {
+    "observed_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "readings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "metrics"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": { "$ref": "common.schema.json#/$defs/entityId" },
+          "metrics": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": { "$ref": "#/$defs/metric" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": ["name", "kind", "value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9][a-z0-9_]*)+$"
+        },
+        "kind": { "enum": ["gauge", "counter"] },
+        "value": { "type": "number" },
+        "unit": { "enum": ["By", "ratio", "s", "Hz", "count"] },
+        "temporality": { "const": "cumulative" },
+        "attributes": { "$ref": "common.schema.json#/$defs/scalarMap" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "counter" } } },
+          "then": { "required": ["temporality"] } },
+        { "if": { "properties": { "kind": { "const": "gauge" } } },
+          "then": { "not": { "required": ["temporality"] } } }
+      ]
+    }
+  }
+}

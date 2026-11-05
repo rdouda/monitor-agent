@@ -1,0 +1,25 @@
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz
+stepping	: 7
+cpu MHz		: 2500.000
+physical id	: 0
+siblings	: 2
+core id		: 0
+cpu cores	: 1
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz
+stepping	: 7
+cpu MHz		: 2500.000
+physical id	: 0
+siblings	: 2
+core id		: 0
+cpu cores	: 1
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep

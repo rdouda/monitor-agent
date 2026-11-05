@@ -1,0 +1,4 @@
+36 35 8:1 / /data rw,relatime shared:1 - ext4 /dev/sda1 rw
+37 35 0:20 / /run/user/1000 rw,nosuid,nodev - tmpfs tmpfs rw
+38 35 0:5 / /proc rw,nosuid,nodev,noexec,relatime - proc proc rw
+39 35 8:1 / /mnt/bind rw,relatime shared:1 - ext4 /dev/sda1 rw

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lifecycle-changed.schema.json",
+  "type": "object",
+  "required": ["entity_id", "kind", "name", "status", "reason", "observed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "entity_id": { "$ref": "common.schema.json#/$defs/entityId" },
+    "kind": { "$ref": "common.schema.json#/$defs/entityKind" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "previous_status": { "type": ["string", "null"] },
+    "status": {
+      "enum": ["created", "running", "paused", "restarting", "exited", "dead", "up", "down", "removed"]
+    },
+    "health": { "enum": ["none", "starting", "healthy", "unhealthy"] },
+    "reason": {
+      "enum": [
+        "process_started", "process_exited",
+        "container_created", "container_started", "container_stopped", "container_died",
+        "container_oom_killed", "container_paused", "container_unpaused",
+        "container_restarting", "container_health_changed",
+        "interface_up", "interface_down",
+        "engine_available", "engine_unavailable",
+        "entity_created", "entity_removed", "state_reconciled"
+      ]
+    },
+    "details": { "$ref": "common.schema.json#/$defs/scalarMap" },
+    "observed_at": { "$ref": "common.schema.json#/$defs/timestamp" }
+  }
+}

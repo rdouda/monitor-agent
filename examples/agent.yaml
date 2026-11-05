@@ -1,0 +1,102 @@
+agent:
+  environment: production
+  tags:                         # copied to labels of the host entity
+    team: infrastructure
+    location: lab
+
+paths:
+  state_dir: /var/lib/agent
+  procfs_root: /proc
+  sysfs_root: /sys
+  hostfs_root: /                # prefix for /etc/os-release, /etc/machine-id, ...
+
+server:
+  base_url: "https://ingest.example.com"
+  events_endpoint: "/api/v1/agents/events"
+  enroll_endpoint: "/api/v1/agents/enroll"
+  enrollment_token_file: "/etc/agent/enrollment-token"
+  credential_file: "/var/lib/agent/credential"
+  timeout: 10s
+  tls:
+    ca_file: ""                 # optional custom CA bundle
+    client_cert_file: ""        # optional mTLS
+    client_key_file: ""
+    min_version: "1.2"
+
+modules:
+  host:                         # always enabled, cannot be disabled
+    inventory_interval: 10m
+    metrics_interval: 5s        # CPU, memory, disk I/O
+    disk_usage_interval: 30s
+    exclude_fs_types: [proc, sysfs, devtmpfs, devpts, tmpfs, cgroup, cgroup2, overlay, squashfs, autofs, mqueue, hugetlbfs, debugfs, tracefs, securityfs, pstore, bpf, configfs, fusectl, nsfs, ramfs, rpc_pipefs, nfsd, binfmt_misc, selinuxfs, efivarfs]
+    exclude_mount_prefixes: [/proc, /sys, /dev, /run, /var/lib/docker, /var/lib/containers, /snap]
+    exclude_devices: ['^(loop|ram|fd|sr|zram)\d+']
+
+  process:
+    enabled: true
+    inventory_interval: 60s
+    lifecycle_interval: 5s
+    metrics_interval: 10s
+    metrics_mode: top_n         # top_n | all | allowlist
+    top_n: 50                   # top N by CPU and top N by RSS (union)
+    include_names: []           # glob; if non-empty, only these are reported
+    exclude_names: []           # glob
+    include_kernel_threads: false
+    resolve_user_names: true
+    collect_command_line: false # if true, redaction is mandatory
+    redact_patterns: ['(?i)(password|passwd|secret|token|apikey|api-key|authorization)=\S+', '(?i)--(password|token|secret)\s+\S+']
+
+  containers:
+    enabled: true
+    autodiscovery: true         # probe well-known socket paths
+    runtimes: []                # explicit endpoints, e.g. [{type: docker, endpoint: "unix:///var/run/docker.sock"}]
+    inventory_interval: 60s     # also the reconciliation interval
+    metrics_interval: 15s
+    images_interval: 5m
+    stats_concurrency: 8
+    collect_images: true
+    include_untagged_images: false   # skip untagged build layers not used by a container
+    collect_networks: true
+    collect_volumes: true
+    collect_events: true
+    collect_mount_sources: false   # host paths of bind mounts
+    map_veth_interfaces: true      # best effort
+    label_allowlist: ["agent.*", "com.docker.compose.project", "com.docker.compose.service", "io.podman.compose.project"]
+
+  network:
+    enabled: true
+    inventory_interval: 60s
+    metrics_interval: 10s
+    sockets_interval: 30s
+    collect_listening_ports: true
+    collect_container_namespaces: true
+    collect_mac_addresses: false
+    include_local_routes: false
+    interface_metrics_exclude: ["veth*"]
+    fd_walk_budget: 2s
+    max_netns: 256
+
+reporting:
+  sink: http                    # http | stdout (stdout prints events as JSON lines, for development)
+  flush_interval: 1s
+  max_events_per_batch: 100
+  max_batch_bytes: 262144
+  max_event_bytes: 65536
+  compress: gzip
+  retry:
+    initial_interval: 1s
+    max_interval: 60s           # exponential backoff, full jitter
+  spool:
+    directory: "/var/lib/agent/spool"
+    max_size_mb: 100
+    segment_size_mb: 4
+  resync_after_outage: 60s
+
+limits:
+  max_entities_per_kind: 20000
+  max_lifecycle_events_per_minute: 600
+
+logging:
+  level: info
+  format: json
+  file: ""                      # empty = stdout (journald)

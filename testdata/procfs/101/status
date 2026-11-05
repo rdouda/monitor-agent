@@ -1,0 +1,6 @@
+Name:	nginx
+Uid:	33	33	33	33
+Gid:	33	33	33	33
+VmSize:	  12345 kB
+VmRSS:	   4500 kB
+Threads:	2

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "envelope.schema.json",
+  "type": "object",
+  "required": [
+    "specversion", "id", "source", "type", "subject", "time",
+    "datacontenttype", "agentid", "agentseq", "agentrun", "environment", "data"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "specversion": { "const": "1.0" },
+    "id": { "$ref": "common.schema.json#/$defs/uuid" },
+    "source": { "type": "string", "pattern": "^urn:agent:[0-9a-f-]{36}$" },
+    "type": {
+      "enum": [
+        "agent.entity.upsert.v1",
+        "agent.relationship.upsert.v1",
+        "agent.relationship.removed.v1",
+        "agent.metric.batch.v1",
+        "agent.entity.lifecycle.changed.v1",
+        "agent.heartbeat.v1",
+        "agent.snapshot.completed.v1"
+      ]
+    },
+    "subject": { "$ref": "common.schema.json#/$defs/entityId" },
+    "time": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "datacontenttype": { "const": "application/json" },
+    "agentid": { "$ref": "common.schema.json#/$defs/uuid" },
+    "agentseq": { "type": "integer", "minimum": 1 },
+    "agentrun": { "$ref": "common.schema.json#/$defs/uuid" },
+    "environment": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "data": { "type": "object" }
+  },
+  "allOf": [
+    { "if": { "properties": { "type": { "const": "agent.entity.upsert.v1" } } },
+      "then": { "properties": { "data": { "$ref": "entity-upsert.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.relationship.upsert.v1" } } },
+      "then": { "properties": { "data": { "$ref": "relationship-upsert.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.relationship.removed.v1" } } },
+      "then": { "properties": { "data": { "$ref": "relationship-removed.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.metric.batch.v1" } } },
+      "then": { "properties": { "data": { "$ref": "metric-batch.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.entity.lifecycle.changed.v1" } } },
+      "then": { "properties": { "data": { "$ref": "lifecycle-changed.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.heartbeat.v1" } } },
+      "then": { "properties": { "data": { "$ref": "heartbeat.schema.json" } } } },
+    { "if": { "properties": { "type": { "const": "agent.snapshot.completed.v1" } } },
+      "then": { "properties": { "data": { "$ref": "snapshot-completed.schema.json" } } } }
+  ]
+}
