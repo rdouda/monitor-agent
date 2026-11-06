@@ -12,17 +12,35 @@ made where the specification leaves room are recorded in
 
 ## Status
 
-All six build phases from `AGENTS.md` §14 are implemented:
+Phases 0–6 from `AGENTS.md` §14 are implemented. Phases 7–12 add node-local
+Kubernetes discovery and CRI support. Phases 13+ are a candidate backlog for
+broader server monitoring; they are not scheduled or implemented.
 
-| Phase | Status |
-|---|---|
-| 0 — Foundations (IDs, config, events, schemas, mock server) | done |
-| 1 — Core + host module + `agent once` | done |
-| 2 — Spool, batching, retry, enrollment, heartbeat, systemd unit | done |
-| 3 — Process module and lifecycle scan | done |
-| 4 — Docker/Podman discovery, containers, images, networks, volumes, pods, events, veth mapping | done |
-| 5 — Network interfaces, routes, listening sockets, container namespaces, netlink change detection | done |
-| 6 — Hardening, SIGHUP reload, fuzz/race tests, README | done |
+| Phase | Scope | Status |
+|---|---|---|
+| 0 — Foundations | IDs, config, events, schemas, mock server | done |
+| 1 — Core + host | Identity, scheduler, supervisor, event builder, host module, `agent once` | done |
+| 2 — Reporting | Spool, batching, retry, enrollment, heartbeat, `agentseq`, systemd unit | done |
+| 3 — Process | Process inventory, lifecycle scan, metrics, cgroup hints | done |
+| 4 — Containers | Docker/Podman discovery, containers, images, networks, volumes, pods, events, veth mapping | done |
+| 5 — Network | Interfaces, routes, listening sockets, container namespaces, netlink change detection | done |
+| 6 — Hardening | SIGHUP reload, fuzz/race tests, README | done |
+| 7 — Kubernetes contract | `kubernetes_node`/`kubernetes_pod` kinds and IDs; additive schema, lifecycle, metric, config and docs changes | planned |
+| 8 — Kubernetes host mode | Node hostname/mountinfo fixes; hostNetwork/hostPID requirements; container image, RBAC, DaemonSet manifests | planned |
+| 9 — Kubernetes inventory | Read-only API client; node/pod inventory; owner and service attributes; snapshots; watch-driven lifecycle | planned |
+| 10 — CRI adapter | containerd/CRI-O over CRI v1 gRPC; read-only interceptor; container/image inventory; stats; process/network linking | planned |
+| 11 — Kubernetes metrics | Pod CPU/memory aggregates; lifecycle rate limiting; health details; watch reconnect/resync | planned |
+| 12 — Kubernetes E2E | kind-based end-to-end tests; 300-pod/1,000-container budget; upgrade notes | planned |
+| 13 — systemd + journald | Unit/timer state, failed units, restart counts; OOM and service-failure signals via journald; no full log shipping | backlog |
+| 14 — Storage health | SMART, mdraid, LVM, btrfs/ZFS pool state, disk temperature | backlog |
+| 15 — Hardware/platform | hwmon/thermal/fans/power, PCI/USB/NUMA inventory, time-sync state | backlog |
+| 16 — Update/security posture | Pending package updates, reboot-required, unattended-upgrade status, login sessions/failed logins, SELinux/AppArmor | backlog |
+| 17 — Network health | conntrack usage, TCP retransmits/errors, nftables counters, WireGuard/IPsec peers, NFS mount health, DNS resolver state | backlog |
+| 18 — Local service probes | nginx `stub_status`, HAProxy stats socket, Envoy admin, Redis `INFO`, libvirt VMs (read-only, opt-in) | backlog |
+| 19 — Container log tailing | Bounded, cursor-based tail; separate shipper/module rather than core agent scope | backlog |
+
+Phases 13+ are candidates, not commitments. Each needs its own design pass before
+implementation.
 
 Known limitations are listed at the end of `docs/DECISIONS.md`.
 
