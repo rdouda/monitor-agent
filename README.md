@@ -6,15 +6,18 @@ pods), and network interfaces/routes/listening sockets, then reports inventory,
 relationships, lifecycle events, and metrics to an Ingestion API as
 CloudEvents JSON over HTTPS.
 
-The normative wire format and design are in [`AGENTS.md`](AGENTS.md). Choices
-made where the specification leaves room are recorded in
+The normative wire format and design of the baseline (phases 0–6) are in
+[`AGENTS.md`](AGENTS.md). Work beyond phase 6 is specified in
+[`docs/plans/`](docs/plans/README.md), one plan per area. Choices made where the
+specification leaves room are recorded in
 [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Status
 
-Phases 0–6 from `AGENTS.md` §14 are implemented. Phases 7–12 add node-local
-Kubernetes discovery and CRI support. Phases 13+ are a candidate backlog for
-broader server monitoring; they are not scheduled or implemented.
+Phases 0–6 from `AGENTS.md` §14 are implemented. Phases 7–12
+([Kubernetes plan](docs/plans/kubernetes.md)) and 13–24
+([node-health plan](docs/plans/node-health/README.md)) have written designs but
+are not implemented. Phases 25–27 are a backlog without a design.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -25,22 +28,32 @@ broader server monitoring; they are not scheduled or implemented.
 | 4 — Containers | Docker/Podman discovery, containers, images, networks, volumes, pods, events, veth mapping | done |
 | 5 — Network | Interfaces, routes, listening sockets, container namespaces, netlink change detection | done |
 | 6 — Hardening | SIGHUP reload, fuzz/race tests, README | done |
-| 7 — Kubernetes contract | `kubernetes_node`/`kubernetes_pod` kinds and IDs; additive schema, lifecycle, metric, config and docs changes | planned |
-| 8 — Kubernetes host mode | Node hostname/mountinfo fixes; hostNetwork/hostPID requirements; container image, RBAC, DaemonSet manifests | planned |
-| 9 — Kubernetes inventory | Read-only API client; node/pod inventory; owner and service attributes; snapshots; watch-driven lifecycle | planned |
-| 10 — CRI adapter | containerd/CRI-O over CRI v1 gRPC; read-only interceptor; container/image inventory; stats; process/network linking | planned |
-| 11 — Kubernetes metrics | Pod CPU/memory aggregates; lifecycle rate limiting; health details; watch reconnect/resync | planned |
-| 12 — Kubernetes E2E | kind-based end-to-end tests; 300-pod/1,000-container budget; upgrade notes | planned |
-| 13 — systemd + journald | Unit/timer state, failed units, restart counts; OOM and service-failure signals via journald; no full log shipping | backlog |
-| 14 — Storage health | SMART, mdraid, LVM, btrfs/ZFS pool state, disk temperature | backlog |
-| 15 — Hardware/platform | hwmon/thermal/fans/power, PCI/USB/NUMA inventory, time-sync state | backlog |
-| 16 — Update/security posture | Pending package updates, reboot-required, unattended-upgrade status, login sessions/failed logins, SELinux/AppArmor | backlog |
-| 17 — Network health | conntrack usage, TCP retransmits/errors, nftables counters, WireGuard/IPsec peers, NFS mount health, DNS resolver state | backlog |
-| 18 — Local service probes | nginx `stub_status`, HAProxy stats socket, Envoy admin, Redis `INFO`, libvirt VMs (read-only, opt-in) | backlog |
-| 19 — Container log tailing | Bounded, cursor-based tail; separate shipper/module rather than core agent scope | backlog |
+| 7 — Kubernetes contract | `kubernetes_node`/`kubernetes_pod` kinds and IDs; additive schema, lifecycle, metric, config and docs changes | designed |
+| 8 — Kubernetes host mode | Node hostname/mountinfo fixes; hostPID requirement; container image, RBAC, DaemonSet manifests | designed |
+| 9 — Kubernetes inventory | Read-only API client; node/pod inventory; owner and service attributes; snapshots; watch-driven lifecycle | designed |
+| 10 — CRI adapter | containerd/CRI-O over CRI v1 gRPC; read-only interceptor; container/image inventory; stats; process/network linking | designed |
+| 11 — Kubernetes metrics | Pod CPU/memory aggregates; lifecycle rate limiting; health details; watch reconnect/resync | designed |
+| 12 — Kubernetes E2E | kind-based end-to-end tests; 300-pod/1,000-container budget; upgrade notes | designed |
+| 13 — Node-health contract | Additive schema (14 kinds, 9 modules, units `Cel V W A J rpm`, 13 lifecycle reasons); ID builders; `ModuleHealth.Details`; not-applicable modules; exit hints; config skeletons | designed |
+| 14 — Certificates | Local TLS certificate expiry (`certificate.expires_in`); private keys never read into events | designed |
+| 15 — Sensors | hwmon, thermal zones, fans, voltages, current, power, RAPL energy | designed |
+| 16 — Hardware inventory | DMI, PCI, USB, NUMA, hugepages, kernel modules, taint, Secure Boot | designed |
+| 17 — Posture | Reboot-required, kernel drift, pending updates where the distro provides them, unattended upgrades, SELinux/AppArmor, lockdown, CPU mitigations | designed |
+| 18 — Storage A | Disk inventory, mdraid, btrfs, ZFS pool state, disk temperature (sysfs/procfs only) | designed |
+| 19 — systemd | Units and timers over a read-only D-Bus client (`internal/dbusro`) | designed |
+| 20 — Kernel events | OOM kills and kernel error classes from `/dev/kmsg` and `/proc/vmstat` (replaces `sd-journal`, which needs cgo) | designed |
+| 21 — Time sync | Kernel clock state, chrony, systemd-timesyncd | designed |
+| 22 — Auth | Login sessions (logind/utmp), failed-login counts without usernames | designed |
+| 23 — Storage B | SMART/NVMe/SCSI health over allowlisted read-only ioctls | designed |
+| 24 — Storage C | device-mapper: LVM volume groups, thin-pool and cache status | designed |
+| 25 — Network health | conntrack usage, TCP retransmits/errors, nftables counters, WireGuard/IPsec peers, NFS mount health, DNS resolver state | backlog |
+| 26 — Local service probes | nginx `stub_status`, HAProxy stats socket, Envoy admin, Redis `INFO`, libvirt VMs (read-only, opt-in) | backlog |
+| 27 — Container log tailing | Bounded, cursor-based tail; separate shipper/module rather than core agent scope | backlog |
 
-Phases 13+ are candidates, not commitments. Each needs its own design pass before
-implementation.
+Phases 25+ are candidates, not commitments; each needs its own design pass before
+implementation. Phases 7–24 are designs: new modules ship `enabled: false` and
+require the ingestion backend to accept the new kinds first (see
+[`docs/plans/README.md`](docs/plans/README.md)).
 
 Known limitations are listed at the end of `docs/DECISIONS.md`.
 

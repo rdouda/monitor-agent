@@ -1,15 +1,23 @@
 # Agent — Technical Design v1.0
 
 **Audience:** the AI coding agent that will implement this system.
-**Status:** v1 specification. Linux only. Written in Go.
+**Status:** v1 baseline specification (phases 0-6). Linux only. Written in Go.
+
+> **Baseline document.** This file is the *initial design* of the project and is
+> intentionally **not** updated for each new feature. Work beyond phase 6
+> (Kubernetes, CRI, systemd, journald, storage health, sensors, and so on) is
+> specified in its own plan under `docs/plans/`, which extends this document.
+> Check `docs/plans/` and the phase table in `README.md` before starting new work.
+> If a plan and this file disagree, the plan wins for the area it covers;
+> otherwise this file applies unchanged.
 
 ---
 
 ## 0. How to use this document
 
-1. This document is the source of truth. The JSON Schemas in **Appendix A are normative** for the wire format. If prose and a schema disagree, the schema wins.
-2. Do **not** invent event types, entity kinds, relationship types, metric names, or fields. If something is ambiguous, pick the simplest reading and record it in `docs/DECISIONS.md`.
-3. Follow the build order in **§14**. Each phase has a Definition of Done. Do not start a phase before the previous one is done.
+1. This document is the source of truth for the v1 baseline. The JSON Schemas in **Appendix A are normative** for the baseline wire format. If prose and a schema disagree, the schema wins. Additive extensions are defined by plans in `docs/plans/` and are reflected in `schemas/v1/`; the files in `schemas/v1/` are the schemas actually enforced, so Appendix A is not edited for each extension.
+2. Do **not** invent event types, entity kinds, relationship types, metric names, or fields. Names introduced by an approved plan in `docs/plans/` are allowed. If something is ambiguous, pick the simplest reading and record it in `docs/DECISIONS.md`.
+3. Follow the build order in **§14** for the baseline, and the phase order in the relevant plan for extensions. Each phase has a Definition of Done. Do not start a phase before the previous one is done.
 4. Keywords **MUST**, **MUST NOT**, **SHOULD** are used in the RFC 2119 sense.
 5. Every collector **MUST** be testable without a real host. Read from injectable roots (`paths.procfs_root`, `paths.sysfs_root`, `paths.hostfs_root`) and use fixtures in `testdata/`.
 6. Go 1.22+, `CGO_ENABLED=0`, targets `linux/amd64` and `linux/arm64`.
@@ -31,6 +39,8 @@ and reports inventory, relationships, lifecycle events, and metrics to a central
 It needs no code changes in monitored applications. It is **outbound-only** and **read-only**: it never modifies the host or any container.
 
 ### Non-goals for v1
+
+(Baseline scope. Some of these are picked up later by plans in `docs/plans/`.)
 
 Kubernetes discovery, Windows/macOS, log collection, tracing, database-specific monitoring, remote commands, packet capture, port scanning, outbound connection tracking.
 
@@ -1036,6 +1046,7 @@ agent/
 ├── examples/agent.yaml
 ├── testdata/            procfs/ sysfs/ netlink/ docker/ podman/   # recorded fixtures
 ├── docs/DECISIONS.md
+├── docs/plans/                       # designs for work beyond phase 6 (see docs/plans/README.md)
 ├── go.mod
 └── README.md
 ```
@@ -1091,6 +1102,8 @@ The `schemas/v1/` files are exactly the schemas in Appendix A. A test serializes
 | **4 — Containers** | Docker adapter, then Podman adapter, manager, events, Container Index | Acceptance 4, 5, 6 and process→container linking |
 | **5 — Network** | Interfaces, routes, sockets, netlink events, container namespaces, veth mapping | Acceptance 7 |
 | **6 — Hardening** | Load tests, fuzzing, resource budget, optional proc-connector, packaging scripts, README | All of §13.2 |
+
+Phases beyond 6 are not defined in this table. They are specified in `docs/plans/` (Kubernetes: phases 7-12; node health: phases 13-24).
 
 ---
 
